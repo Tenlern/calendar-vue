@@ -29,28 +29,29 @@ function showEventModal(date: number) {
 }
 
 
-const blankDays = ref([])
+const pastBlanks = ref(0)
 const monthDays = ref([])
+const futureBlanks = ref(0)
 function getNoOfDays() {
 	let daysInMonth = new Date(year.value, month.value + 1, 0).getDate();
-
-	// find where to start calendar day of week
-	let dayOfWeek = new Date(year.value, month.value).getDay();
+	let firstDay = new Date(year.value, month.value).getDay();
+	let lastDay = new Date(year.value, month.value, daysInMonth).getDay();
 	
-	let blankdaysArray: number[] = []
-	for ( var i=1; i < dayOfWeek; i++) {
-		blankdaysArray.push(i)
-	}
+	// Дни прошлого месяца
+	pastBlanks.value = firstDay-1
+	// Дни будущего месяца
+	futureBlanks.value = 7-lastDay
 
 	let daysArray: number[] = []
 	for ( var i=1; i <= daysInMonth; i++) {
 		daysArray.push(i);
 	}
 					
-	blankDays.value = blankdaysArray
+	
 	monthDays.value = daysArray
 
-	// TODO: Дни будущего месяца
+	
+	
 }
 
 onMounted(() => {
@@ -96,30 +97,29 @@ onMounted(() => {
 				</div>	
 
 				<div class="-mx-1 -mb-1">
-					<div class="flex flex-wrap" style="margin-bottom: -40px;">
+					<div class="flex flex-wrap">
 						<template v-for="(day, index) in DAYS" :key="index">	
 							<div style="width: 14.26%" class="px-2 py-2">
-								<div
-									v-text="day" 
-									class="text-gray-600 text-sm uppercase tracking-wide font-bold text-center"></div>
+								<div class="text-gray-600 text-sm uppercase tracking-wide font-bold text-center">
+									{{ day }}
+								</div>
 							</div>
 						</template>
 					</div>
 
 					<div class="flex flex-wrap border-t border-l">
-						<template v-for="blankday in blankDays">
-							<div 
+						<template v-for="blankday in pastBlanks">
+							<div class="text-center border-r border-b px-4 pt-2"	
 								style="width: 14.28%; height: 120px"
-								class="text-center border-r border-b px-4 pt-2"	
 							></div>
 						</template>	
 						<template v-for="(date, dateIndex) in monthDays" :key="dateIndex">	
-							<div style="width: 14.28%; height: 120px" class="px-4 pt-2 border-r border-b relative">
+							<div style="width: 14.28%; height: 120px" class="group px-4 pt-2 border-r border-b cursor-pointer text-center leading-none transition ease-in-out duration-100"
+								@click="showEventModal(date)">
 								<div
-									@click="showEventModal(date)"
 									v-text="date"
 									class="inline-flex w-6 h-6 items-center justify-center cursor-pointer text-center leading-none rounded-full transition ease-in-out duration-100"
-									:class="{'bg-blue-500 text-white': isToday(date) == true, 'text-gray-700 hover:bg-blue-200': isToday(date) == false }"	
+									:class="{'bg-blue-500 text-white': isToday(date) == true, 'text-gray-700 group-hover:bg-blue-200': isToday(date) == false }"	
 								></div>
 								<div style="height: 80px;" class="overflow-y-auto mt-1">
 									<!-- <div 
@@ -144,6 +144,12 @@ onMounted(() => {
 								</div>
 							</div>
 						</template>
+						<template v-for="blankday in futureBlanks">
+							<div 
+								style="width: 14.28%; height: 120px"
+								class="text-center border-r border-b px-4 pt-2"	
+							></div>
+						</template>	
 					</div>
 				</div>
 			</div>
