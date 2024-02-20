@@ -1,13 +1,12 @@
 <script lang="ts" setup>
-import { onMounted } from 'vue';
-
-const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 const month = ref(0)
 const year = ref(0)
 const eventDate = ref('')
-const openModal = ref(false)
+
+const {openModal, closeModal} = useModal()
 
 function initDate() {
 	let today = new Date();
@@ -24,34 +23,30 @@ function isToday(date: number) {
 
 function showEventModal(date: number) {
 	// open the modal
-	openModal.value = true;
+	openModal()
 	eventDate.value = new Date(year.value, month.value, date).toDateString();
 }
 
 
 const pastBlanks = ref(0)
-const monthDays = ref([])
+const monthDays: number[] = ref([])
 const futureBlanks = ref(0)
 function getNoOfDays() {
 	let daysInMonth = new Date(year.value, month.value + 1, 0).getDate();
+	
 	let firstDay = new Date(year.value, month.value).getDay();
 	let lastDay = new Date(year.value, month.value, daysInMonth).getDay();
 	
 	// Дни прошлого месяца
-	pastBlanks.value = firstDay-1
+	pastBlanks.value = firstDay === 0 ? 0 : firstDay-1
 	// Дни будущего месяца
-	futureBlanks.value = 7-lastDay
+	futureBlanks.value = lastDay === 0 ? 0 : 7-lastDay
 
 	let daysArray: number[] = []
 	for ( var i=1; i <= daysInMonth; i++) {
 		daysArray.push(i);
 	}
-					
-	
 	monthDays.value = daysArray
-
-	
-	
 }
 
 onMounted(() => {
@@ -70,14 +65,14 @@ onMounted(() => {
 
 				<div class="flex items-center justify-between py-2 px-6">
 					<div>
-						<span v-text="MONTH_NAMES[month]" class="text-lg font-bold text-gray-800"></span>
-						<span v-text="year" class="ml-1 text-lg text-gray-600 font-normal"></span>
+						<span class="text-lg font-bold text-gray-800">{{ MONTHS[month] }}</span>
+						<span class="ml-1 text-lg text-gray-600 font-normal">{{ year }}</span>
 					</div>
 					<div class="border rounded-lg px-1" style="padding-top: 2px;">
 						<button class="leading-none rounded-lg transition ease-in-out duration-100 inline-flex cursor-pointer hover:bg-gray-200 p-1 items-center"
 							:class="{'cursor-not-allowed opacity-25': month == 0 }"	
 							type="button"
-							:disabled="month == 0"
+							:disabled="month === 0"
 							@click="month--; getNoOfDays()">
 							<svg class="h-6 w-6 text-gray-500 inline-flex leading-none"  fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -87,7 +82,7 @@ onMounted(() => {
 						<button class="leading-none rounded-lg transition ease-in-out duration-100 inline-flex items-center cursor-pointer hover:bg-gray-200 p-1" 
 							:class="{'cursor-not-allowed opacity-25': month == 11 }"
 							type="button"
-							:disabled="month == 11"
+							:disabled="month === 11"
 							@click="month++; getNoOfDays()">
 							<svg class="h-6 w-6 text-gray-500 inline-flex leading-none"  fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -108,19 +103,19 @@ onMounted(() => {
 					</div>
 
 					<div class="flex flex-wrap border-t border-l">
-						<template v-for="blankday in pastBlanks">
+						<template v-if="pastBlanks" v-for="blankday in pastBlanks">
 							<div class="text-center border-r border-b px-4 pt-2"	
 								style="width: 14.28%; height: 120px"
 							></div>
 						</template>	
-						<template v-for="(date, dateIndex) in monthDays" :key="dateIndex">	
+						<template v-if="monthDays" v-for="(date, dateIndex) in monthDays" :key="dateIndex">	
 							<div style="width: 14.28%; height: 120px" class="group px-4 pt-2 border-r border-b cursor-pointer text-center leading-none transition ease-in-out duration-100"
 								@click="showEventModal(date)">
-								<div
-									v-text="date"
-									class="inline-flex w-6 h-6 items-center justify-center cursor-pointer text-center leading-none rounded-full transition ease-in-out duration-100"
+								<div class="inline-flex w-6 h-6 items-center justify-center cursor-pointer text-center leading-none rounded-full transition ease-in-out duration-100"
 									:class="{'bg-blue-500 text-white': isToday(date) == true, 'text-gray-700 group-hover:bg-blue-200': isToday(date) == false }"	
-								></div>
+								>
+									{{ date }}	
+								</div>
 								<div style="height: 80px;" class="overflow-y-auto mt-1">
 									<!-- <div 
 										class="absolute top-0 right-0 mt-2 mr-2 inline-flex items-center justify-center rounded-full text-sm w-6 h-6 bg-gray-700 text-white leading-none"
@@ -144,10 +139,9 @@ onMounted(() => {
 								</div>
 							</div>
 						</template>
-						<template v-for="blankday in futureBlanks">
-							<div 
+						<template v-if="futureBlanks" v-for="blankday in futureBlanks">
+							<div class="text-center border-r border-b px-4 pt-2"
 								style="width: 14.28%; height: 120px"
-								class="text-center border-r border-b px-4 pt-2"	
 							></div>
 						</template>	
 					</div>
@@ -156,7 +150,7 @@ onMounted(() => {
 		</div>
 
 		<!-- Modal -->
-		<EventModal v-model="openModal" :date="eventDate"></EventModal>
+		<EventModal :date="eventDate"></EventModal>
 		<!-- /Modal -->
 	</div>
   </div>

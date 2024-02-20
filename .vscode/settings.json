@@ -2,5 +2,11 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "[javascript]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+    },
+    "nuxtr.defaultPackageManager": "Bun",
+    "nuxtr.openItemsAfterCreation": true,
+    "nuxtr.piniaFiles.defaultTemplate": "setup",
+    "nuxtr.vueFiles.firstTag": "script",
+    "nuxtr.vueFiles.style.addStyleTag": false,
+    "vue.server.runtime": "bun"
 }
